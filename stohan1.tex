@@ -1,0 +1,862 @@
+\documentclass[11pt]{article}
+
+\usepackage{a4wide}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[section]{placeins}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{definition}{Определение}
+\newtheorem{proposition}{Утверждение}
+
+\newcommand*{\hm}[1]{#1\nobreak\discretionary{}{\hbox{$\mathsurround=0pt #1$}}{}}
+\newcommand\abs[1]{\left\lvert#1\right\rvert}
+\newcommand{\scalar}[2]{\left<#1,#2\right>}
+\newcommand{\norm}[1]{\left\lVert #1 \right\lVert}
+\newcommand{\const}{\ensuremath{\operatorname{const}}}
+\newcommand{\sgn}{\ensuremath{\operatorname{sgn}}}
+\newcommand{\Var}[1]{\mathbb{V}\mathrm{ar}\left( #1 \right)}
+\renewcommand{\d}[1]{\ensuremath{\operatorname{d}\!{#1}}}
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+\ \vspace{-3cm} \newline
+\includegraphics[width=0.5\textwidth]{msu.eps}\\
+{\scshape Московский государственный университет имени М.~В.~Ломоносова}\\
+Факультет вычислительной математики и кибернетики\\
+Кафедра системного анализа
+
+\vfill
+
+{\LARGE Отчёт по практикуму <<Стохастический анализ>>} \newline
+%\vspace{1cm}
+{\Huge\bfseries }
+\end{center}
+
+\vspace{1cm}
+\begin{flushright}
+\large
+\textit{Студент 415 группы}\\
+В.~С.~Терёшин\\
+%\vspace{5mm}
+%\textit{Руководитель практикума}\\
+%к.ф.-м.н., доцент П.~П.~Петров
+\end{flushright}
+
+\vfill
+\begin{center}
+Москва, 2014
+\end{center}
+\pagebreak
+\tableofcontents
+\pagebreak
+\section{Задание 1}
+\subsection{Постановка задачи}
+\begin{enumerate}
+\item Реализовать генератор схемы Бернулли с заданной вероятностью успеха p. На основе генератора схемы Бернулли построить датчик для биномиального распределения и геометричекого распределения.
+\item Для геометрического распределения проверить свойство отсутствия памяти.
+\item Рассмотрим игру в орлянку — бесконечную последовательность независимых испытаний с бросанием правильной монеты. Обозначим через $X_1,X_2,\ldots$ последовательность независимых одинаково распределенных случайных величин, каждая из которых принимает значения $1$, если в соответствующем испытании выпал герб, и $-1$ в противном случае (с вероятностью $\tfrac{1}{2}$). Обозначим суммарный выигрыш через $S_n = X_1 + \ldots + X_n$. Необходимо произвести $N = 1000$ испытаний Бернулли и построить траекторию процесса $Y(t), t \in [0, 1]$, которая в точках $t_n = \tfrac{n}{N}$, где $n = 0, 1, \ldots, N,$ равна $Y(t_n) = \frac{S_n}{\sqrt{N}}$, а в остальных случаях определяется с помощью кусочно-линейной интерполяции (т. е. в виде ломаной).
+\end{enumerate}
+\subsection{Теоретические выкладки}
+\begin{definition}[Схема Бернулли]
+Схемой Бернулли с заданной вероятностью успеха $p$ называется эксперимент, состоящий из серии испытаний, удовлетворяющих следующим свойствам:
+\begin{enumerate}
+\item Отсутствие взаимного влияния;
+\item Воспроизводимость испытаний (испытания производятся в сходных условиях);
+\item В каждом испытании наблюдается признак, причем вероятность его проявления (успеха) равна $p$.
+\end{enumerate}
+\end{definition}
+\begin{definition}[Бернуллиевская случайная величина]
+Случайная величина $Y$, принимающая значение $1$ с вероятностью $p$ и значение $0$ с вероятностью $1-p$, называется случайной величиной с распределением Бернулли (или Бернуллиевской случайной величиной).
+Обозначение: $Y \sim Ber(p)$.
+\end{definition}
+
+Пусть мы априори имеем случайную величину $X$, равномерно распределённую на $[0, 1]$. Тогда мы можем построить $Y \sim Ber(p)$ следующим образом:
+$$
+Y = \begin{cases}
+1 & X \in [0, p), \\
+0 & X \in [p, 1].
+\end{cases}
+$$
+Несложно видеть, что построенная случайная величина является бернуллиевской.
+
+\begin{definition}[Биномиальное распределение]
+Пусть $X_1, \ldots ,X_n$ — набор независимых случайных величин с распределением Бернулли. Тогда, случайная величина
+$$
+Y = \sum\limits_{i=1}^{n} X_i
+$$
+называется случайной величиной, имеющей биномиальное распределение с параметрами $n$ и $p$. Обозначение: $Y \sim B(n, p)$.
+\end{definition}
+
+Смоделировать случайную величину, имеющую биномиальное распределение можно следующим образом: $n$ генерируем бернуллиевскую случайную величину и суммируем. Легко заметить, что $\mathbb{P}(Y = k) = C_n^k p^k (1-p)^{n-k}$.
+
+\begin{definition}[Геометрическое распределение]
+Случайная величина $Y$, равная количеству неудач до появления первого успеха в схеме Бернулли с параметром $p$, называется случайной величиной, имеющей геометрическое распределение с параметром $p$. Обозначение: $Y \sim Geom(p)$.
+\end{definition}
+
+Очевидно, что $\mathbb{P}(Y = k) = p(1-p)^k$. Построить такую случайную величину можно, проводя испытания бернуллиевской случайной величины и считая количество проведённых испытаний до первого успеха.
+
+\begin{theorem}[Отсутствие памяти у геометрического распределения] Если $Y \sim Geom(p)$, то $\mathbb{P}(Y > m + n \mid Y \geqslant m) = \mathbb{P}(Y > n)$ для любых целых неотрицательных $n$ и $m$. Это свойство называется свойством «Отсутствия памяти».
+\end{theorem}
+\begin{proof}
+\begin{gather}
+\mathbb{P}(Y > m + n \mid Y \geqslant m) = \frac{\mathbb{P}(Y > n + m \cap Y \geqslant m)}{\mathbb{P}(Y \geqslant m)} = \notag \\
+= \frac{\mathbb{P}(Y > n+m)}{\mathbb{P}(Y \geqslant m)} = \frac{(1-p)^{m+n+1}}{(1-p)^m} = (1-p)^{n+1} = \mathbb{P}(Y>n). \notag
+\end{gather}
+\end{proof}
+\subsection{Примеры работы программы}
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.8]{pics/1/binom_plot.eps}
+\caption{Гистограмма и точная вероятность биномиального распределения при $n \hm= 1000, p = 0.5$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/1/geom_plot.eps}
+	\caption{Гистограмма и геометрического распределения при $n = 10000, p = 0.5$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/1/geom_nomemory.eps}
+	\caption{Гистограммы для $\mathbb{P}(Y > m + n \mid Y \geqslant m)$ и $\mathbb{P}(Y > n)$, $m = 5$, $n = 3$.}
+\end{figure}
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.8]{pics/1/orlyanka.eps}
+\caption{Траектория процесса игры в орлянку, $n=1000$.}
+\end{figure}
+\pagebreak
+\section{Задание 2}
+\subsection{Постановка задачи}
+\begin{enumerate}
+\item Построить датчик для сингулярного распределения, отвечающий канторовой функции распределения.
+\item Для канторовых случайных величин проверить свойство симметричности относительно $\tfrac{1}{2}$ ($X$ и $1-X$ распределены одинаково) и самоподобия (условное распределение $Y$ при условии $Y \in [0, \tfrac{1}{3}]$ совпадает с распределением $\tfrac{Y}{3}$).
+\end{enumerate}
+\subsection{Теоретические выкладки}
+\begin{definition}[Сингулярная функция распределения]
+Функция распределения называется сингулярной, если она непрерывна и множество точек её роста имеет нулевую меру Лебега.
+\end{definition}
+\begin{definition}[Канторово множество]
+Канторовым множеством называется совершенное нигде не плотное множество.
+\end{definition}
+
+Рассмотрим множество $A$ чисел из отрезка $[0, 1]$, в троичной записи которых отсутствует цифра $1$:
+$$
+A = \{ \delta_1, \delta_2, \ldots, \delta_n, \ldots, \; \delta_i = 0, 2 \}.
+$$
+Очевидно, что данное множество является канторовым.
+
+С помощью бернуллиевской случайной величины $\xi$ получим случайную величину $Y$, с вероятностью $1$ принимающей значения из $A$:
+\begin{gather}
+\xi_k \sim Ber(0.5), \notag \\
+Y = \sum\limits_{k=1}^{\infty} \frac{2\xi_k}{3^k}. \notag
+\end{gather}
+
+Для достижения достаточной точности ($\varepsilon = 10^{-9}$) будем использовать первые $20$ членов ряда, т.к.:
+$$
+\sum\limits_{k=20}^{\infty} \frac{2\xi_k}{3^k} \leqslant \sum\limits_{k=20}^{\infty} \frac{2}{3^k} \approx 2.8 \cdot 10^{-10}.
+$$
+\subsubsection{Свойства симметричности и самоподобия}
+Рассмотрим случайную величину $1-Y$:
+$$
+1 - Y = 1 - \sum\limits_{k=1}^{\infty} \frac{2\xi_k}{3^k} = \sum\limits_{k=1}^{\infty} \frac{2}{3^k} - \sum\limits_{k=1}^{\infty} \frac{2\xi_k}{3^k} = \sum\limits_{k=1}^{\infty} \frac{2(1 - \xi_k)}{3^k} = \sum\limits_{k=1}^{\infty} \frac{2\eta_k}{3^k}.
+$$
+$\eta_k$ --- бернуллиевские случайные величины с параметром $0.5$, из чего следует, что $1-Y$ имеет то же распределение, что и $Y$.
+
+Рассмотрим условное распределение $Y$ при условии $Y \in [0, \tfrac{1}{3}]$. Для данного построения это условие эквивалентно тому, что $\xi_1 = 0$:
+$$
+Y = \sum\limits_{k=2}^{\infty} \frac{2\xi_k}{3^k} = \sum\limits_{k=1}^{\infty} \frac{2\xi_{k+1}}{3^{k+1}}=\frac{1}{3} \sum\limits_{k=1}^{\infty} \frac{2\xi_k}{3^k} = \frac{1}{3} Y.
+$$
+Таким образом, $Y$ обладает свойством самоподобия.
+\subsection{Примеры работы программы}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/2/singular_plot.eps}
+	\caption{График канторового распределения}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/2/singular_selfsimilarity.eps}
+	\caption{Функция распределения $Y$ при условии $Y \in [0, \tfrac{1}{3}]$ (синяя линия) и функция распределения $\tfrac{Y}{3}$ (красная линия).}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/2/singular_symmetry.eps}
+	\caption{Функция распределения $Y$ (синяя линия) и функция распределения $1-Y$ (красная линия).}
+\end{figure}
+\pagebreak
+\section{Задание 3}
+\subsection{Постановка задачи}
+\begin{enumerate}
+\item Построить датчик экспоненциального распределения. Проверить свойство отсутствия памяти.
+\item На основе датчика экспоненциального распределения построить датчик пуассоновского распределения.
+\item Построить датчик пуассоновского распределения как предел биномиального распределения. С помощью критерия хи-квадрат Пирсона убедиться, что получен датчик распределения Пуассона.
+\item Построить датчик стандартного нормального распределения методом моделирования случайных величин парами с переходом в полярные координаты (вывод обосновать).
+\end{enumerate}
+\subsection{Теоретические выкладки}
+\begin{definition}[Экспоненциальное распределение]
+Случайная величина $\xi$ имеет экспоненциальное распределение с параметром $\lambda$, если её функция распределения имеет вид:
+$$
+F_{\xi} (x) = \begin{cases}
+1 - e^{-\lambda x}, & x \geqslant 0, \\
+0, & x < 0.
+\end{cases}.
+$$
+\end{definition}
+
+\begin{theorem}
+\label{inverse_function}
+Пусть функция $F(x)$ непрерывна и монотонно возрастает на $\mathbb{R}$, $\lim_{x \to -\infty} F(x) \hm= 0$, $\lim_{x \to +\infty} F(x) = 1$. Тогда случайная величина $X = F^{-1}(Y)$, где $Y$ имеет равномерное распределение на $[0, 1]$, имеет функцию распределения $F_X(x) = F(x)$.
+\end{theorem}
+
+Применяя данное утверждение, получим:
+\begin{gather}
+F_X(x) = 1 - e^{-\lambda x}, \notag \\
+F_X^{-1}(x) = -\frac{1}{\lambda}\ln\left( 1 - x \right). \notag
+\end{gather}
+Если $Y$ имеет равномерное распределение на $[0, 1]$, то $X = -\frac{1}{\lambda}\ln\left( 1-Y \right)$ имеет экспоненциальное распределение с параметром $\lambda$.
+
+\begin{definition}[Распределение Пуассона]
+Случайная величина $\xi$ имеет распределение Пуассона с параметром $\lambda > 0$, если
+$$
+\mathbb{P}(\xi = k) = \frac{\lambda^k}{k!}e^{-\lambda}, \; k = 0, 1, 2, \ldots.
+$$
+\end{definition}
+
+\begin{theorem}
+Пусть $\eta_1, \eta_2, \ldots , \eta_n, \ldots$ --- независимые случайные величины, имеющие экспоненциальное распределение с параметром $\lambda$, и пусть
+$$
+\xi = \max\{n : \eta_1 + \eta_2 + \ldots + \eta_n < 1\}
+$$
+(полагаем, что $\xi = 0$ в том случае, когда $\eta_1 > 1$). Тогда случайная величина $\xi$ имеет распределение Пуассона с параметром $\lambda$.
+\end{theorem}
+
+С помощью этой теоремы можно смоделировать пуассоновскую случайную величину. Действительно, будем получать значения случайных величин $\eta_k$, имеющих экспоненциальное распределение с параметром $\lambda$, до тех пор, пока их сумма $S_k$ не превысит $1$. Тогда случайная величина $Y=1-k$ будет иметь пуассоновское распределение с параметром $\lambda$.
+
+Пуассоновскую случайную величину можно смоделировать ещё одним способом. Известно, что если $n$ достаточно велико, а $\lambda$ --- фиксированное число, то
+$$
+Bin\left( n, \frac{\lambda}{n} \right) \approx P(\lambda).
+$$
+
+С помощью критерия Пирсона убедимся, что построенная случайная величина имеет распределение Пуассона. Для этого будем использовать выборку из $n$ испытаний. Т.к. исследуемое распределение принимает только целые неотрицательные значения, то мы можем обозначить за $n_i$ количество элементов выборки, имеющие значения $i$. Через $p_i$ обозначим теоретическую вероятность выпадения значения $i$ пуассоновской случайной величины:
+$$
+p_i = \frac{\lambda^i}{i!}e^{-i}.
+$$
+
+Пусть $k$ --- максимальное значение в выборке. Построим статистику критерия $\chi^2$ Пирсона:
+$$
+X_n^2 = n \sum\limits_{i=1}^k \frac{\left( \frac{n_i}{n} - p_i \right)^2 }{p_i}.
+$$
+
+Гипотеза о пуассоновском распределении построенной случайной величины будет отброшена, если значение статистики $X_n^2$ превысит критическую величину для пуассоновского распределения.
+
+\subsubsection{Стандартное нормальное распредедение}
+Построим случайную величину, имеющую стандартное нормальное распределение. Рассмотрим случайные величины $\xi \sim \mathcal{N}(0, 1)$, $\eta \sim \mathcal{N}(0, 1)$. Совместная функция распределения имеет вид:
+\begin{gather}
+\mathbb{P}(\xi < x, \eta < y) = \int\limits_{-\infty}^x \int\limits_{-\infty}^y \frac{1}{2\pi} e^{\frac{-\left( x_1^2 + x_2^2 \right) }{2}}  d x_1 d x_2 = \iint \limits_{\substack{r\cos(\varphi) < x \\ r\sin(\varphi) < y}} \frac{r}{2\pi} e^{\frac{-r^2}{2}} d r d\varphi = \notag \\
+= \iint\limits_{\substack{\sqrt{\omega} \cos(\varphi) < x \\ \sqrt{\omega} \sin(\varphi) < y}} \frac{1}{2} e^{\frac{\omega}{2}} \frac{1}{2\pi} d\omega d\varphi. \notag
+\end{gather}
+Подынтегральное выражение является произведением плотностей случайных величин $\omega \sim Exp(0.5)$ и $\varphi \sim U[0, 2\pi]$. Таким образом, совместное распределение случайных величин $\xi$ и $\eta$ совпадает с совместным распределением $\left\{ \sqrt{\omega}\cos(\varphi), \sqrt{\omega}\sin(\varphi) \right\}$. Следовательно, мы можем построить стандартные нормальные случайные величины в виде:
+$$
+\xi = \sqrt{\omega} \cos(\varphi), \; \eta = \sqrt{\omega} \cos(\varphi).
+$$
+
+Случайные величины $\xi$ и $\eta$ являются независимыми, т.к. их совместное распределение равно произведению их распределений:
+$$
+\mathbb{P}(\xi < x, \eta < y) = \int\limits_{-\infty}^x \int\limits_{-\infty}^y \frac{1}{2\pi} e^{\frac{-\left( x_1^2 + x_2^2 \right) }{2}}  d x_1 d x_2 = \int\limits_{-\infty}^x \frac{1}{\sqrt{2\pi}} e^{\frac{-x_1^2}{2}} d x_1 \int\limits_{-\infty}^y \frac{1}{\sqrt{2\pi}} e^{\frac{-x_2^2}{2}} d x_2.
+$$
+\subsection{Примеры работы программы}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/3/exponential_plot.eps}
+	\caption{График экспоненциального распределения, $n = 10000$, $\lambda = 1$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/3/poisson_plot.eps}
+	\caption{Гистограмма распределения Пуассона, построенного на основе датчик экспоненциального распределения, $n = 10000$, $\lambda = 5$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/3/poisson_alternative_plot.eps}
+	\caption{Гистограмма распределения Пуассона, построенного как предел биномиального распределения, $n = 5000$, $\lambda = 5$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/3/poisson_alternative_pirson_plot.eps}
+	\caption{Усредненные значения статистики критерия Пирсона. $n = 50$, $\lambda = 1$. Критическое значение $\chi^2_{r,\alpha}$ для уровня значимости $\alpha = 0.95$ и $n = 50$ примерно равно $34.76425$. Было проведено $100$ экспериментов. Из графика видно, что усредненное значение статистики меньше, чем критическое значение, а значит мы действительно получили распределение Пуассона.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/3/std_normal_plot.eps}
+	\caption{Гистограмма стандартного нормального распределения, $n = 100000$.}
+\end{figure}
+\pagebreak
+\section{Задание 4}
+\subsection{Постановка задачи}
+\begin{enumerate}
+\item Построить датчик распределения Коши.
+\item Мажорируя плотность стандартного нормального распределения плотностью распределения Коши с параметрами сдвига a и масштаба b, обеспечить максимальную эффективность метода фон Неймана моделирования нормального распределения.
+\item Сравнить скорость моделирования в задании 3 и задании 4.
+\end{enumerate}
+\subsection{Теоретические выкладки}
+\begin{definition}
+Случайная величина $\xi$ имеет распределение Коши с параметрами
+$a$ и $b$, если её функция распределение имеет вид:
+$$
+F_{\xi}(x) = \frac{1}{\pi} \arctg \left( \frac{x-a}{b} \right) + \frac{1}{2}.
+$$
+\end{definition}
+Плотность распределения Коши:
+$$
+q(x) = \frac{1}{\pi} \frac{b}{(x-a)^2+b^2}.
+$$
+
+Для моделирования распределения Коши воспользуемся теоремой \ref{inverse_function}. $F_{\xi}(x)$ строго возрастает и имеет обратную функцию:
+$$
+F_{\xi}^{-1}(x) = a + b \tg \left[ \pi \left( x - \frac{1}{2} \right) \right].
+$$
+По теореме \ref{inverse_function} случайная величина $X = F_{\xi}^{-1}(Y)$, где $Y$ имеет равномерное распределение на $[0, 1]$, имеет распределение Коши.
+
+Смоделируем стандартное нормальное распределение с помощью метода Фон Неймана. Для этого воспользуемся следующим алгоритмом:
+\begin{enumerate}
+\item Пусть $q(x) = \tfrac{1}{\pi} \tfrac{b}{(x - a)^2 + b^2}$ — плотность распределения Коши, а $p(x) = \tfrac{1}{\sqrt{2\pi}} e^{-\tfrac{x^2}{2}}$ — плотность стандартного нормального распределения. Найдем число $k$ такое, что для любого $x \in \mathbb{R}$ выполнено $p(x) \leqslant kq(x)$.
+\item Получим реализацию случайной величины $x$, имеющей распределение Коши с параметрами $a$ и $b$.
+\item Построим случайную величину $V(x) \sim Ber\left( \tfrac{p(x)}{kq(x)} \right)$ и получим реализацию этой
+случайной величины $y$.
+\item Если $y = 1$, то $x$ --- реализация случайной величины, имеющей стандартное нормальное распределение, если же $y = 0$, то возвращаемся к пункту 2.
+\end{enumerate}
+
+Заинтересуемся значениями параметров $k$, $a$ и $b$, при которых достигается наибольшая скорость работы алгоритма Фон Неймана. Очевидно, что метод работает быстрее всего при значении $\tfrac{p(x)}{kq(x)}$, близком к $1$. Таким образом,
+\begin{gather}
+k^* = \min\limits_{a,b} \max\limits_x \frac{p(x)}{q(x)}, \notag \\
+\frac{p(x)}{q(x)} = \frac{\sqrt{\pi}}{b\sqrt{2}} e^{-\frac{x^2}{2}} \left[ (x-a)^2 + b^2 \right]. \notag
+\end{gather}
+
+Рассмотрим случай $a=0$:
+$$
+k^*_0 = \min\limits_b \max\limits_x \frac{\sqrt{\pi}}{b\sqrt{2}} e^{-\frac{x^2}{2}} \left[ x^2 + b^2 \right].
+$$
+Найдём максимум функции $g(x) = e^{-\frac{x^2}{2}} \left[ x^2 + b^2 \right]$. Для этого вычислим производную $g'(x)$:
+$$
+g'(x) = -xe^{\frac{x^2}{2}} \left[ x^2 + b^2 \right] + 2xe^{-\frac{x^2}{2}} = -x\left[ x^2 + b^2 - 2 \right]e^{-\frac{x^2}{2}}
+$$
+Максимум $g(x)$ достигается при $x=0$, если $\abs{b} > \sqrt{2}$, и при $x = \pm \sqrt{2-b^2}$, если $\abs{b} \leqslant \sqrt{2}$. Таким образом, можно представить $k_0$ в виде:
+$$
+k_0 = \min \left\{ \min\limits_{\abs{b} > \sqrt{2}} \left( \frac{b\sqrt{\pi}}{\sqrt{2}} \right), \min\limits_{\abs{b} \leqslant \sqrt{2}} \left( \frac{\sqrt{2\pi}}{b} e^{\frac{b^2 - 2}{2}} \right) \right\}.
+$$
+
+Теперь рассмотрим случай $a \neq 0$:
+\begin{gather}
+k^* = \min\limits_{a,b} \max\limits_{x} \frac{\sqrt{\pi}}{b\sqrt{2}} \left[ (x-a)^2 + b^2 \right]e^{-\frac{x^2}{2}} = \notag \\
+= \min\limits_a \left\{ \min\limits_{\abs{b} > \sqrt{2}} \max\limits_x \left( \frac{\sqrt{\pi}}{b\sqrt{2}}\left[ e^{-\frac{x^2}{2}}[(x-a)^2 + b^2] \right] \right), \min\limits_{\abs{b} \leqslant \sqrt{2}} \max\limits_x \left( \frac{\sqrt{\pi}}{b\sqrt{2}}\left[ e^{-\frac{x^2}{2}}[(x-a)^2 + b^2] \right] \right)\right\} \geqslant \notag \\
+\geqslant \min\limits_a \left\{ \min\limits_{\abs{b} > 2} \left( \frac{\sqrt{\pi}}{b\sqrt{2}} \left[ a^2 + b^2 \right] \right), \min\limits_{\abs{b} \leqslant \sqrt{2}} \left( \frac{\sqrt{\pi}}{b\sqrt{2}} \left[ e^{\frac{b^2-2}{2}} [(\abs{a} + \sqrt{2-b^2})^2 + b^2] \right] \right) \right\} > \notag \\
+> \min\limits_a \left\{ \min\limits_{\abs{b} > \sqrt{2}} \left( \frac{\sqrt{\pi}}{\sqrt{2}}b \right),  \min\limits_{\abs{b} \leqslant \sqrt{2}} \left( \frac{\sqrt{\pi}}{b\sqrt{2}} \left[ e^{\frac{b^2-2}{2}} \left[\left( \sqrt{2-b^2} \right)^2 + b^2 \right] \right] \right) \right\} = k_0^*. \notag
+\end{gather}
+Таким образом, $k^* > k^*_0$ для любого $a \neq 0$. Поэтому наибольшая скорость сходимости работы алгоритма Фон Неймана будет достигаться при $a = 0$.
+$$
+k^* = k^*_0 = \min \left\{ \min\limits_{\abs{b} > \sqrt{2}} \left( \frac{b\sqrt{\pi}}{\sqrt{2}} \right), \min\limits_{\abs{b} \leqslant \sqrt{2}} \left( \frac{\sqrt{2\pi}}{b} e^{\frac{b^2-2}{2}} \right) \right\} = \min \left\{ \sqrt{\pi}, \min\limits_{\abs{b} \leqslant \sqrt{2}} \left( \frac{\sqrt{2\pi}}{b} e^{\frac{b^2-2}{2}} \right) \right\}.
+$$
+Вычислим производную $f(x) = \tfrac{\sqrt{2\pi}}{b} e^{\tfrac{b^2-2}{2}}$:
+$$
+f'(x) = \sqrt{2\pi} e^{\frac{b^2-2}{2}} \left( 1 - \frac{1}{b^2} \right),
+$$
+откуда получаем, что минимум достигается при $b=1$, а $k^* = \sqrt{\tfrac{2\pi}{e}}$. Таким образом, мы получаем, что максимальная скорость работы метода Фон Неймана для моделирования стандартных нормальных величин будет достигаться при использовании параметров $a = 0$ и $b = 1$.
+\subsection{Примеры работы программы}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/4/std_normal_by_von_neumann_plot.eps}
+	\caption{Гистограмма стандартного нормального распределения, $n = 100000$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/4/std_normals_time_comparing_plot.eps}
+	\caption{Сравнение времени работы алгоритмов с ростом количества сгенерированных случайных величин. Красная линия --- время работы метода генерирования случайных величин парами с переходом в полярные координаты. Синяя линия --- время работы метода Фон Неймана.}
+\end{figure}
+\pagebreak
+\section{Задание 5}
+\subsection{Постановка задачи}
+\begin{enumerate}
+\item Пусть $X_i \sim \mathcal{N}(\mu, \sigma^2)$. Убедиться эмпирически в справедливости ЗБЧ и ЦПТ, т.е. исследовать поведение суммы $\tfrac{S_n}{n}$ и эмпирического распределения величины
+$$
+\sqrt{n}\left( \frac{S_n}{n} - a \right).
+$$
+\item Считая $\mu$ и $\sigma^2$ неизвестными, для п. 1 построить доверительные интервалы для среднего и дисперсии.
+\item Пусть $X_i \sim a + b\xi$, $\xi$ имеет стандартное распределение Коши. Проверить эмпирически, как ведет себя $\tfrac{S_n}{n}$. Результат объяснить.
+\end{enumerate}
+\subsection{Теоретические выкладки}
+\begin{theorem}[Закон больших чисел]
+Пусть $\xi_1, \xi_2, \ldots$ --- последовательность независимых одинаково распределенных случайных величин с $\mathbb{E}\abs{\xi_i} < \infty$, $S_n = \xi_1 + \ldots + \xi_n$ и $\mathbb{E}\xi_1 = \mu$. Тогда $\frac{S_n}{n} \rightarrow \mu$ по вероятности, т.е. для любого $\varepsilon > 0$:
+$$
+\mathbb{P}\left\{ \abs{\frac{S_n}{n} - \mu} \geqslant \varepsilon \right\} \rightarrow 0, \; n \rightarrow \infty.
+$$
+\end{theorem}
+
+\begin{theorem}[Центральная пределеная теорема]
+Пусть $\xi_1, \xi_2, \ldots$ --- последовательность независимых одинаково распределенных (невырожденных) случайных величин с $\mathbb{E}\xi_1^2 < \infty$ и $S_n = \xi_1 + \ldots + \xi_n$. Тогда при $n \rightarrow \infty$
+$$
+\mathbb{P}\left\{ \frac{S_n - \mathbb{E}S_n}{\sqrt{\mathbb{V}\mathrm{ar} \left( S_n \right)}} \leqslant x \right\} \rightarrow \Phi(x), \; x \in \mathbb{R},
+$$
+где
+$$
+\Phi(x) = \frac{1}{\sqrt{2\pi}} \int\limits_{-\infty}{x} e^{-\frac{u^2}{2}} du.
+$$
+\end{theorem}
+\subsection{Примеры работы программы}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/5/law_of_large_numers_for_normal_distribution_plot.eps}
+	\caption{Закон больших чисел для нормального распределения. $\mu = 10, \sigma^2 = 1$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/5/central_limit_theorem_plot.eps}
+	\caption{Центральная предельная теорема для случайных величин, равномерно распределённых на $[0, 1]$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/5/no_law_of_large_numbers_for_cauchy_distribution_plot.eps}
+	\caption{Невыполнение закона больших чисел для распределения Коши. $a =	5, b = 1$. ЗБЧ не выполняется, т.к. математическое ожидание не существует.}
+\end{figure}
+\pagebreak
+\section{Задание 6}
+\subsection{Постановка задачи}
+Посчитать интеграл
+$$
+\int\limits_{-\infty}^{+\infty} \int\limits_{-\infty}^{+\infty} \ldots \int\limits_{-\infty}^{+\infty} \frac{e^{-\left( x_1^2 + \ldots + x_{10}^2 + \frac{1}{2^7 \cdot x_1^2 \cdot \ldots \cdot x_{10}^2} \right) }}{x_1^2 \cdot \ldots \cdot x_{10}^2} dx_1 \ldots dx_{10}
+$$
+\begin{itemize}
+\item Методом Монте-Карло.
+\item Методом квадратур, сводя задачу к вычислению собственного интеграла Римана.
+\item Для каждого метода оценить точность вычислений.
+\end{itemize}
+\subsection{Теоретические выкладки}
+\subsubsection{Вычисление интеграла методом Монте-Карло}
+Перепишем интеграл
+$$
+I = \int\limits_{-\infty}^{+\infty} \int\limits_{-\infty}^{+\infty} \ldots \int\limits_{-\infty}^{+\infty} \frac{e^{-\left( x_1^2 + \ldots + x_{10}^2 + \frac{1}{2^7 \cdot x_1^2 \cdot \ldots \cdot x_{10}^2} \right) }}{x_1^2 \cdot \ldots \cdot x_{10}^2} dx_1 \ldots dx_{10}
+$$
+в виде
+$$
+I = \int\limits_{-\infty}^{+\infty} \int\limits_{-\infty}^{+\infty} \ldots \int\limits_{-\infty}^{+\infty} f(x_1, \ldots, x_{10}) g(x_1, \ldots, x_{10}) dx_1 \ldots dx_{10},
+$$
+где
+$$
+f(x) = \pi^5 \frac{e^{-\left( x_1^2 + \ldots + x_{10}^2 + \frac{1}{2^7 \cdot x_1^2 \cdot \ldots \cdot x_{10}^2} \right) }}{x_1^2 \cdot \ldots \cdot x_{10}^2}, \; g(x) = \frac{1}{\pi^5} e^{-\left( x_1^2 + \ldots + x_{10}^2 \right)}.
+$$
+
+Легко видеть, что функция $g(x)$ является совместной плотностью набора независимых случайных величин, имеющих нормальное распределение с параметрами $0$ и $\tfrac{1}{2}$. Таким образом, можно переписать интеграл $I$ в виде:
+$$
+I = \mathbb{E}f(x_1, \ldots, x_{10}), \; x_i \sim \mathcal{N}\left( 0, \frac{1}{2} \right).
+$$
+
+В силу закона больших чисел выборочное среднее будет стремиться к математическо-
+му ожиданию, т.е.
+$$
+\frac{S_n}{n} = \frac{1}{n} \sum\limits_{k=1} n f(x_k) \rightarrow I, \; x_k \sim \mathcal{N}\left( 0, \frac{1}{2} \right), \; n \rightarrow +\infty.
+$$
+
+%Оценим погрешность метода Монте-Карло с помощью центральной предельной теоремы:
+%\begin{gather}
+%\mathbb{P}\left( \abs{\frac{S_n}{n} - I} < \varepsilon \right) = \mathbb{P}\left( \abs{\frac{S_n - In}{n}} < \varepsilon \right) = \mathbb{P}\left( \abs{\frac{S_n - In}{\sigma \sqrt{n}}} < \frac{\sqrt{n}}{\sigma} \varepsilon \right) = \notag \\
+%= \mathbb{P}\left( \frac{S_n - In}{\sigma \sqrt{n}} < \frac{\sqrt{n}}{\sigma} \varepsilon \right) - \mathbb{P}\left( \frac{S_n - In}{\sigma \sqrt{n}} < -\frac{\sqrt{n}}{\sigma} \varepsilon \right) \approx \notag \\
+%\approx \Phi\left( \frac{\varepsilon \sqrt{n}}{\sigma} \right) - \Phi\left( -\frac{\varepsilon \sqrt{n}}{\sigma} \right) = 2\Phi\left( \frac{\varepsilon \sqrt{n}}{\sigma} \right) - 1, \notag
+%\end{gather}
+%где
+%$$
+%\Phi(x) = \frac{1}{\sqrt{2\pi}} \int\limits_{-\infty}^x e^{-\frac{u^2}{2}} du.
+%$$
+
+%Подобрать значение $\varepsilon$ можно с помощью таблицы квантилей. Для квантили $k_{\alpha}$ получим выражение для погрешности
+%$$
+%\varepsilon = \frac{k_{\alpha}\sigma}{\sqrt{n}}.
+%$$
+
+%Так как точное значение $\sigma$ неизвестно, то будем пользоваться выборочной дисперсией
+%$$
+%\sigma_n = \frac{1}{n} \sum\limits_{i = 1}^n f^2(x_i) - \left( \frac{1}{n} \sum\limits_{i=1}^n f(x_i) \right)^2.
+%$$
+
+Для оценки погрешностей воспользуемся неравенством Чебышёва: с вероятностью $1 - \gamma$ выполняется:
+$$
+\abs{I_n - I} \leqslant \sqrt{\frac{\mathbb{V}\mathrm{ar}(f(x))}{\gamma n}}.
+$$
+
+Задавая вероятность ошибки $\gamma$, можно получить размер ошибки $\varepsilon$.
+
+Дисперсию $f(x)$ будем считать как выборочную дисперсию:
+$$
+\mathbb{V}\mathrm{ar}(f(x)) = \frac{1}{n} \sum\limits_{k=1}^n \left( f(x_k) - I_n \right)^2 = \frac{1}{n} \sum\limits_{k=1}^n f^2(x_k) - \frac{2}{n} I_n \sum\limits_{k=1}^n f(x_k) + I_n^2.
+$$
+
+Результаты вычислений:
+
+\begin{tabular}{|c|c|c|c|}
+\hline
+N & Значение интеграла & Время работы (сек.) & Погрешность ($\gamma = 0.01$)\\
+\hline
+$10^4$ & $116.1245$ & $14.884070$ & $109.7859$ \\
+\hline
+$10^5$ & $119.8156$ & $151.226067$ & $35.0222$ \\
+\hline
+$10^6$ & $124.1312$ & $1486.088206$ & $11.3612$ \\
+\hline
+\end{tabular}
+\subsubsection{Вычисление интеграла методом квадратур}
+Заметим, что значение подынтегрального выражения симметрично относительно $x_i = 0$. Значит, можно интегрировать только по положительному полупространству, после этого умножив на $2^{10}$.
+
+Для подсчёта интеграла сделаем замену
+$$
+x_i = \tg \left( \frac{\pi}{2} t \right).
+$$
+Тогда интеграл примет вид:
+$$
+I = 2^{10} \int\limits_0^1 \int\limits_0^1 \ldots \int\limits_0^1 \frac{\exp\left\{ -\left( \tg^2 \left( \frac{\pi}{2} t_1 \right) + \ldots + \tg^2 \left( \frac{\pi}{2} t_10 \right) + \frac{1}{2^7 \cdot \tg^2 \left( \frac{\pi}{2} t_1 \right) \cdot \ldots \cdot \tg^2 \left( \frac{\pi}{2} t_{10} \right) } \right) \right\} }{\tg^2 \left( \frac{\pi}{2} t_1 \right) \cdot \ldots \cdot \tg^2 \left( \frac{\pi}{2} t_{10} \right) \cdot \cos^2 \left( \frac{\pi}{2} t_1 \right) \cdot \ldots \cdot \cos^2 \left( \frac{\pi}{2} t_{10} \right)} dt_1 \ldots dt_{10}.
+$$
+
+Воспользуемся методом прямоугольников. Для этого разобьём отрезки $[0, 1]$ на $N$ частей и будем считать величину
+$$
+I_n = 2^{10} \frac{1}{N^{10}} \sum\limits_{i_1 = 1}^N \ldots \sum\limits_{i_{10} = 1}^N f\left( \frac{i_1}{N}, \ldots, \frac{i_{10}}{N} \right).
+$$
+
+Как известно, погрешность метода прямоугольников на равномерной сетке составляет
+$$
+\varepsilon = \frac{\max\left\{ f''(\xi) \right\}}{24} (b - a) h^2.
+$$
+В нашем случае погрешность можно считать как
+$$
+\varepsilon = \frac{h^2}{24} \sum\limits_{i,j = 1}^{10} \max \abs{f''_{x_i, x_j}}, \; h = \frac{1}{N}.
+$$
+
+Результаты вычислений:
+
+\begin{tabular}{|c|c|c|}
+	\hline
+	N & Значение интеграла & Время работы (сек.) \\
+	\hline
+	$3$ & $55.2323$ & $0.030433$ \\
+	\hline
+	$4$ & $88.5577$ & $1.632201$ \\
+	\hline
+	$5$ & $133.9999$ & $28.861510$ \\
+	\hline
+	$6$ & $128.3524$ & $265.153991$ \\
+	\hline
+\end{tabular}
+\pagebreak
+\section{Задание 7}
+\subsection{Постановка задачи}
+Методом случайного поиска найти минимальное значение функции f на множестве, т.е. значение $y = \min f(x)$, где
+$$
+f(x) = x_1^3 \sin \left( \frac{1}{x_1} \right) + 10 x_1 x_2^4 \cos \left( \frac{1}{x_2} \right)
+$$
+при $x_1 \neq 0$ и $x_2 \neq 0$, при $x_1 = 0$ или $x_2 = 0$ функция доопределяется по непрерывности, а множество --- круг $A = (x_1, x_2): x_1^2 + x_2^2 \leqslant 1$. Оценить точность.
+\subsection{Теоретические выкладки}
+Рассмотрим случайные величины $x_1$ и $x_2$, равномерно распределенные на единичном круге:
+$$
+\frac{1}{\pi} \iint\limits_{x_1^2 + x_2^2 \leqslant 1} dx_1 dx_2 = \frac{1}{\pi} \int\limits_0^1 r dr \int\limits_0^{2\pi} d\varphi = \int\limits_0^{2\pi} \frac{1}{2\pi} d\varphi \int\limits_0^1 dr^2.
+$$
+Видно, что их совместное распределение совпадает с совместным распределением случайной величины $\varphi \sim U[0, 2\pi]$ и случайной величины $R$, имеющей функцию распределения
+$$
+F_R(t) = \begin{cases}
+0, & x < 0, \\
+t^2, & x \in [0, 1], \\
+1, & x > 1.
+\end{cases}
+$$
+Моделировать $R$ будем с помощью метода обратных функций. Таким образом, после перехода к полярным координатам
+$$
+x_1 = R \cos \varphi, \; x_2 = R \sin \varphi.
+$$
+Для поиска минимума функции $f$ будем $n$ раз разыгрывать случайные величины $x_1$ и $x_2$, считать для каждой пары значение функции $f(x_1, x_2)$, и затем из полученных $n$ значений выберем минимальное. Оценим погрешность метода. Пусть точка $(x^*, y^*)$ --- точка теоретического минимума, точка $(x, y)$ --- полученный результат работы метода случайного поиска.
+$$
+\abs{f(x^*, y^*) - f(x, y)} \leqslant \max\limits_{(x, y) \in A} \abs{\nabla f} \cdot \abs{(x^*, y^*) - (x, y)}.
+$$
+Оценим $\max\limits_{(x, y) \in A} \abs{\nabla f}$:
+\begin{gather}
+\abs{\frac{\partial f}{\partial x_1}} = \abs{3x_1^2 \sin \left( \frac{1}{x_1} \right) + x_1^3 \cos \left( \frac{1}{x_1} \right) \cdot \left( -\frac{1}{x_1^2} \right) + 10 x_2^4 \cos \left( \frac{1}{x_2} \right)} \leqslant \notag \\
+\leqslant \abs{3x_1^2 - x_1 + 10x_2^4} = \abs{3x_1^2 - x_1 + 10\left( 1 - x_1^2 \right)^2} = \abs{10x_1^4 - 17x_1^2 - x_1 + 10} \leqslant 11. \notag \\
+\abs{\frac{\partial f}{\partial x_2}} = \abs{40x_1 x_2^3 \cos \left( \frac{1}{x_2} \right) + 10x_1 x_2^4 \left( -\sin \left( \frac{1}{x_2} \right) \right) \cdot \left( \frac{1}{x_2^2} \right)} \leqslant \notag \\
+\leqslant \abs{40x_1 x_2^3 + 10x_1 x_2^2} = \abs{40x_1 \left( \sqrt{1 - x_1^2} \right)^3 + 10x_1(1 - x_1^2)} \leqslant 17. \notag \\
+\abs{\nabla f} = \sqrt{\left( \frac{\partial f}{\partial x_1} \right)^2 + \left( \frac{\partial f}{\partial x_2} \right)^2} \leqslant 23. \notag
+\end{gather}
+
+Оценим $\abs{(x^*, y^*) - (x, y)}$. Пусть $p$ --- вероятность того, что в $\varepsilon$-окрестность точки минимума попала одна из $n$ случайных точек ($\varepsilon = \varepsilon(n, p)$). Также, заметим, что исходная функция является чётной по переменной $x_2$, поэтому точек минимума будет две, и они будут симметричны. Возможны два варианта: точка минимума лежит внутри множества $A$ и на границе множества $A$. В первом случае вероятность $p$ того, что хотя бы одна из $n$ точек попала в $\varepsilon$-окрестность точки минимума равна $p = 1-(1-2\varepsilon^2)^n$. Во втором случае: $p = 1-(1-\varepsilon^2)^n$. Таким образом, рассмотрев худший случай, получим, что
+$$
+\varepsilon = \sqrt{1 - (1-p)^{\frac{1}{n}}} \approx \sqrt{\frac{p}{n}}.
+$$
+В итоге получим, что погрешность метода случайного поиска составляет
+$$
+\abs{f(x^*, y^*) - f(x, y)} \leqslant 23 \sqrt{\frac{p}{n}}.
+$$
+\subsection{Результаты вычислений}
+\begin{tabular}{|c|c|c|c|}
+	\hline
+	N & Минимальное значение & Время работы (сек.) & Погрешность ($p = 0.99$)\\
+	\hline
+	$10^4$ & $-1.1458$ & $0.004936$ & $0.7237$ \\
+	\hline
+	$10^6$ & $-1.2878$ & $3.107955$ & $0.0229$ \\
+	\hline
+	$10^8$ & $-1.2884$ & $294.290776$ & $0.0023$ \\
+	\hline
+\end{tabular}
+\pagebreak
+\section{Задание 8}
+\subsection{Постановка задачи}
+Применить метод Монте-Карло к решению первой краевой задачи для двумерного уравнения Лапласа в единичном круге:
+$$
+\left\{
+\begin{aligned}
+\Delta u = 0 \textup{ в области } D, \\
+u \vert_{\delta D} = f(x, y), \\
+u \in C^2(D), f \in C(\delta D), \\
+D = (x, y): x^2 + y^2 < 1.
+\end{aligned}
+\right.
+$$
+Для функции $f(x, y) = x^2$ найти аналитическое решение и сравнить с полученным по методу Монте-Карло.
+\subsection{Теоретические выкладки}
+\subsubsection{Немного о теоретическом решении}
+Будем искать теоретическое решение двумерного уравнения Лапласа, перейдя в полярные координаты, в виде:
+$$
+u(r, \varphi) = \frac{a_0}{2} + \sum\limits_{n=1}^{\infty} r^n \left( a_n \cos n\varphi + b_n \sin n\varphi \right).
+$$
+Переведём также в полярные координаты граничное условие:
+$$
+f(x, y) = x^2 = \frac{1}{2} - \frac{1}{2} \cos 2\varphi = f(r, \varphi).
+$$
+По условию задачи $u(1, \varphi) = f(1, \varphi)$:
+$$
+\frac{a_0}{2} + \sum\limits_{n=1}^{\infty} \left( a_n \cos n\varphi + b_n \sin n\varphi \right) = \frac{1}{2} - \frac{1}{2} \cos 2\varphi.
+$$
+Получим, что $a_0 = 1$, $a_2 = -\tfrac{1}{2}$, остальные $a_i$ и $b_i$ равны $0$. Таким образом
+$$
+u(r, \varphi) = \frac{1}{2} - \frac{r^2}{2} \cos 2\varphi.
+$$
+Возвращаясь к декартовым координатам, получим:
+$$
+u(r, \varphi) = \frac{1}{2} - \frac{r^2}{2} \cos 2\varphi = \frac{1}{2} \left( 1 + r^2(\sin^2 \varphi - \cos^2 \varphi) \right) = \frac{1}{2} \left( 1 + x^2 - y^2 \right).
+$$
+\subsubsection{Численное решение}
+Будем искать численное решение по следующему алгоритму:
+\begin{enumerate}
+\item Построим равномерную сетку. Выделим на ней внутренние и граничные точки множества $D$. Граничными точками будем считать такие точки, которые имеют менее четырех соседей, принадлежащих $D$.
+\item В граничных точках положим $u(x, y) = f(x, y)$.
+\item Во внутренних точках будем производить следующие действия: с равной вероятностью будем переходить в одну из соседних точек до тех пор, пока не достигнем граничной точки. Повторим эту процедуру $n$ раз и посчитаем среднее значение функции в посещенных нами граничных точкам. Положим в данной внутренней точке $u(x, y) = \frac{1}{n} \sum\limits_{i=1}^n f(x_i, y_i)$.
+\end{enumerate}
+\subsection{Примеры работы программы}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/8/laplas_plot.eps}
+	\caption{Численное и теоретическое решения первой краевой задачи для двумерного уравнения Лапласа в
+		единичном круге для $f(x, y) = x^2$.}
+\end{figure}
+\pagebreak
+\section{Задание 9}
+\subsection{Постановка задачи}
+Построить траекторию винеровского процесса $W_t, t \in [0, 1]$, добавляя точки разбиения отрезка. Построить график траектории, не соединяя точки ломаной, с целью получения визуально непрерывной линии. Винеровский процесс --- это гауссовский процесс на отрезке $[0, 1]$, со средним $0$ и ковариационной функцией $k(s, t) = \min(s, t)$.
+\subsection{Теоретические выкладки}
+Будем строить винеровский процесс по следующему алгоритму:
+\begin{enumerate}
+\item $W_0 = 0$, так как $\Var{W_t} = k(t, t) = t$.
+\item $W_1 \sim \mathcal{N}(0, 1)$.
+\item По значениям $W_{t_0}$ и $W_{t_1}$ найдем значение $W_{\frac{t_1+t_0}{2}}$:
+Рассмотрим условную плотность
+$$
+P_{W_t}(x \mid W_{t_0} = x_0, W_{t_1} = x_1) = \frac{P_{W_{t_0} \cdot W_t \cdot W_{t_1}}(x_0, x, x_1)}{P_{W_{t_0} \cdot W_{t_1}}(x_0, x_1)}.
+$$
+
+В силу гауссовости винеровского процесса:
+\begin{gather}
+P_{W_{t_0} \cdot W_{t_1}} = \frac{1}{2\pi \sqrt{\abs{R_1}}} e^{-\frac{1}{2} (x_0, x_1) R_1^{-1} (x_0, x_1)^T}, \notag \\
+P_{W_{t_0} \cdot W_t \cdot W_{t_1}} = \frac{1}{(2\pi)^{2/3} \sqrt{\abs{R_2}}} e^{-\frac{1}{2} (x_0, x, x_1) R_2^{-1} (x_0, x, x_1)^T}, \notag
+\end{gather}
+где $R_1$ и $R_2$ --- ковариационные матрицы.
+\begin{gather}
+R_1 =
+\begin{bmatrix}
+t_0 & t_0 \\
+t_0 & t_1
+\end{bmatrix}, \;
+R_1^{-1} =
+\begin{bmatrix}
+\frac{t_1}{t_0(t_1-t_0)} & \frac{-1}{t_1-t_0} \\
+\frac{-1}{t_1-t_0} & \frac{1}{t_1-t_0}
+\end{bmatrix}, \notag \\
+R_2 =
+\begin{bmatrix}
+t_0 & t_0 & t_0 \\
+t_0 & t & t \\
+t_0 & t & t_1
+\end{bmatrix}, \;
+R_2^{-1} =
+\begin{bmatrix}
+\frac{t}{t_0(t-t_0)} & \frac{-1}{t-t_0)} & 0 \\
+\frac{-1}{t-t_0} & \frac{t_1-t_0}{(t_1-t)(t-t_0)} & \frac{-1}{t_1-t} \\
+0 & \frac{-1}{t_1-t} & \frac{1}{t_1-t}
+\end{bmatrix}. \notag
+\end{gather}
+Таким образом, выражение для условной плотности имеет вид:
+$$
+P_{W_t}(x \mid W_{t_0} = x_0, W_{t_1} = x_1) = \sqrt{\frac{2}{\pi(t_1-t_0)}} \exp \left\{ -\frac{(2x - x_0 x_1)^2}{2(t_1-t_0)} \right\}.
+$$
+
+В итоге имеем, что $\left\{ W_t \mid W_{t_0} = x0, W_{t_1} = x_1 \right\} \sim \mathcal{N}(\frac{x_0 + x_1}{2}, \frac{t_1 - t_0}{4})$.
+\end{enumerate}	
+\subsection{Примеры работы программы}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/9/wiener_process_plot.eps}
+	\caption{Траектория винеровского процесса.}
+\end{figure}
+\pagebreak
+\section{Задание 10}
+\subsection{Постановка задачи}
+Пусть $X$ --- стационарный марковский гауссовский процесс (процесс Орнштейна~-Уленбека).
+\begin{enumerate}
+\item Найти ковариационную функцию и переходные вероятности.
+\item Моделировать независимые траектории марковского процесса с данными переходными вероятностями, начинающимися из разных точек методом добавления разбиения отрезка.
+\end{enumerate}
+\subsection{Теоретические выкладки}
+Так как процесс Орнштейна~-Уленбека является стационарным, то $\mathbb{E}X_t = a$, $\Var{X_t} \hm= \sigma^2$, $R_x(t, s) = R_x(\abs{t-s}) = \sigma^2 \rho(s, t)$, где $\rho(s, t)$ --- коэффициент корреляции. В силу того, что процесс Орнштейна~-Уленбека --- марковский, следует, что $\rho(s, t) = \rho(s, \tau)\rho(\tau, t)$, к тому же $\rho(s, t) = \rho(\abs{s - t})$, а значит $\rho(x + y) = \rho(x)\rho(y)$. Воспользуемся следующей теоремой:
+\begin{theorem}
+Пусть функция $u(t)$ определена при $t > 0$ и ограничена на каждом конечном интервале. Если $u(t)$ удовлетворяет соотношению $u(t + s) = u(t)u(s)$, то или $u(t) \equiv 0$, или $u(t) = e^{-\lambda t}$, где $\lambda$ --- некоторая положительная константа.
+\end{theorem}
+
+Если $\rho(t) \equiv 0$, то $cov(X_t, X_s) = 0$, что с учетом того, что процесс $X_t$ --- гауссовский, говорит о том, что величины $X_t$ независимы в совокупности, а значит в этом случае моделирование процесса Орнштейна~-Уленбека заключается в моделировании случайных величин, имеющих распределение $\mathcal{N}(a, \sigma^2)$. Если $\rho(t) = e^{-\lambda t}, \lambda > 0$, тогда $R_x(\abs{t-s}) = \sigma^2 e^{-\lambda \abs{t-s}}$. Рассмотрим переходную вероятность
+$$
+P_{X_t} (x \mid X_s = x_1) = \frac{P_{X_t \cdot X_s}(x, x_1)}{P_{X_s}(x_1)}.
+$$
+Так как процесс гауссовский, то
+\begin{gather}
+P_{x_s} (x_1) = \frac{1}{\sqrt{2\pi}\sigma} e^{\frac{x_1^2}{2\sigma^2}}, \notag \\
+P_{X_t \cdot X_s}(x, x1) = \frac{1}{2\pi\sqrt{\abs{R}}} \exp\left\{ -\frac{1}{2}(x, x_1) R^{-1} (x, x_1)^T \right\}, \notag
+\end{gather}
+где $R$ — ковариационная матрица, которая имеет вид
+$$
+R =
+\begin{bmatrix}
+\sigma^2 & \sigma^2 e^{-\lambda \abs{t-s}} \\
+\sigma^2 e^{-\lambda \abs{t-s}} & \sigma^2 
+\end{bmatrix}.
+$$
+Откуда, очевидно, следует, что
+$$
+P_{X_t}(x \mid X_s = x_1) = \frac{1}{\sigma \sqrt{2\pi\left( 1 - e^{-2\lambda\abs{t-s}} \right)}} \exp \left\{ -\frac{(x - x_1 e^{-\lambda \abs{t-s}})^2}{2\sigma^2 \left( 1 - e^{-2\lambda\abs{t-s}} \right)} \right\}.
+$$
+
+Опишем теперь алгоритм моделирования процесса Орнштейна-Уленбека на времен-
+ном отрезке $[0, T]$:
+\begin{enumerate}
+\item $X_0 \sim \mathcal{N}(a, \sigma^2)$.
+\item $X_T \sim \mathcal{N}\left(x_0 e^{-\lambda T}, \sigma^2\left( 1 - e^{-2\lambda T} \right)\right)$.
+\item По значениям $x_0$ и $x_1$ найдём значение
+$$
+X_t = X_{\frac{t_0 + t_1}{2}} \sim \mathcal{N}\left( (x_0 + x_1) \frac{\exp\left\{ -\frac{-\lambda(t_1-t_0)}{2} \right\}}{1+e^{-\lambda(t_1-t_0)}}, \sigma^2 \frac{1-e^{-\lambda(t_1-t_0)}}{1+e^{-\lambda(t_1-t_0)}} \right).
+$$
+\end{enumerate}
+\subsection{Примеры работы программы}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/10/ornstein_uhlenbeck_process_plot_1.eps}
+	\caption{Траектория процесса Орнштейна-Уленбека, $\lambda = 25, \sigma = 1, a = 1$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/10/ornstein_uhlenbeck_process_plot_2.eps}
+	\caption{Траектория процесса Орнштейна-Уленбека, $\lambda = 1, \sigma = 15, a = 1$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/10/ornstein_uhlenbeck_process_plot_3.eps}
+	\caption{Траектория процесса Орнштейна-Уленбека, $\lambda = 1, \sigma = 1, a = 1$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/10/ornstein_uhlenbeck_process_plot_4.eps}
+	\caption{Траектория процесса Орнштейна-Уленбека, $\lambda = 5, \sigma = 5, a = 5$.}
+\end{figure}
+\pagebreak
+\section{Задание 11}
+\subsection{Постановка задачи}
+Построить двумерное пуассоновское поле, отвечающее сложному пуассоновскому процессу:
+\begin{enumerate}
+\item Первая интерпретация: система массового обслуживания. При этом, первая координата поля --- время поступления заявки в СМО (равномерное распределение), вторая --- время её обслуживания (распределение $\chi^2$ с $10$ степенями свободы).
+\item Вторая интерпретация: работа страховой компании. Первая координата --- момент наступления страхового случая (равномерное распределение), вторая координата --- величина ущерба (распределение Парето). Поступление капитала по времени линейно со скорость $c > 0$, начальный капитал $W > 0$. Посчитать распределение времени разорения для разных значений параметров.
+\end{enumerate}
+\section{Модель СМО}
+Смоделируем систему массового обслуживания по следующему алгоритму:
+\begin{enumerate}
+\item Сгенерируем времена поступления заявок в систему массового обслуживания на временном интервале $[0, T]$: $0 \leqslant t_1 \leqslant t_2 \leqslant \ldots \leqslant t_n \leqslant T$, причем $t_i-t_{i-1} \sim Exp(\lambda)$, $\lambda > 0$ --- интенсивность потока заявок. Время обработки $s_i$ каждой заявки смоделируем с помощью распределения $\chi^2$ с $10$ степенями свободы.
+\item Для каждой заявки будем считать время время её исполнения $Q_i$. Здесь возможны 2 варианта: если $Q_{i-1} < t_i$ (т.е. к моменту поступления $i$-й заявки очереди нет), то $Q_i = t_i + s_i$. Если же $Q_{i-1} \geqslant t_i$ (т.е. очередь есть), то $Q_i = Q_{i-1} + s_i$.
+\item Также для каждой заявки будем считать количество людей в очереди. Если во время поступления $i$-й заявки очереди не было, то положим $n_i = 0$, если же очередь была, то посчитаем количество $Q_k$ таких, что $k < i$ и $Q_k > t_i$ (т.е. количество ещё не выполненных к моменту времени $t_i$ заявок).
+\end{enumerate}
+
+Заметим, что среднее время поступления новой заявки равно $\mathbb{E}(t_i - t_{i-1}) = \tfrac{1}{\lambda}$, а среднее время обслуживания заявки равно $\mathbb{E}s_i = 10$. Значит, при значениях $\lambda > 0.1$ среднее время обработки заявки будет больше, чем среднее время поступления новой заявки, и очередь будет бесконечно расти; при значениях $\lambda < 0.1$ система будет справлять с потоком заявок; значению $\lambda = 0.1$ будет соответствовать некоторое промежуточное значение.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/11/order_plot_1.eps}
+	\caption{График количества заявок в очереди, $T = 1000$, $\lambda = 0.08$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/11/order_plot_2.eps}
+	\caption{График количества заявок в очереди, $T = 1000$, $\lambda = 0.1$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/11/order_plot_2_1.eps}
+	\caption{График количества заявок в очереди, $T = 10000$, $\lambda = 0.1$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/11/order_plot_3.eps}
+	\caption{График количества заявок в очереди, $T = 1000$, $\lambda = 1$.}
+\end{figure}
+\pagebreak
+\subsection{Модель страховой компании}
+Сгенерируем времена поступления наступления страховых случаев на временном интервале $[0, T]$: $0 \leqslant t_1 \leqslant t_2 \leqslant \ldots \leqslant t_n \leqslant T$, причем $t_i - t_{i-1} \sim Exp(\lambda)$, $\lambda > 0$ --- интенсивность потока страховых случаев. Величину ущерба $s_i$ страхового случая в момент времени $t_i$ будем генерировать с помощью распределения Парето с параметрами $x_m$ и $k$.
+
+\begin{definition}
+Случайная величина $\xi$ называется случайной величиной, имеющей распределение Парето с параметрами $x_m$ и $k$, если её функция распределения имеет вид
+$$
+F_{\xi}(x) = 1 - \left( \frac{x_m}{x} \right)^k.
+$$
+\end{definition}
+
+Величина капитала компании в момент времени $t$ выражается как $W(t) = W_0 + ct \hm- s(t)$, где $s(t)$ --- сумма величин ущерба страховых случаев, произошедших в моменты времени $t_i$ такие, что $t_i \leqslant t$.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/11/capital_plot_1.eps}
+	\caption{График изменения величины капитала компании при $\lambda = 20$, $W_0 = 1000$, $c = 1$, $x_m = 15$, $k = 10$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/11/devastation_histogram_plot_1.eps}
+	\caption{Гистограмма времени разорения компании при $\lambda = 20$, $W_0 = 1000$, $c = 1$, $x_m = 15$, $k = 10$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/11/capital_plot_2.eps}
+	\caption{График изменения величины капитала компании при $\lambda = 0.1$, $W_0 = 1000$, $c = 2$, $x_m = 10$, $k = 2$.}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.8]{pics/11/devastation_histogram_plot_2.eps}
+	\caption{Гистограмма времени разорения компании при $\lambda = 0.1$, $W_0 = 1000$, $c = 2$, $x_m = 10$, $k = 2$. Значение при $t = 10000$ означает, что компания не разорилась за наблюдаемое время.}
+\end{figure}
+\pagebreak
+\addcontentsline{toc}{section}{Список литературы}
+\begin{thebibliography}{99}
+	\bibitem{Shiriaev} Ширяев~А.~Н. Вероятность: В 2-кн. --- 4 изд., переработанное и дополненное --- М.: МЦНМО, 2007.
+	\bibitem{Kropacheva} Кропачёва~Н.~Ю., Тихомиров~А.~С. Моделирование случайных величин: метод. указания. --- НовГУ им. Ярослава Мудрого --- Великий Новгород, 2004.
+	\bibitem{Feller} Феллер~В. Введение в теорию вероятности и её приложения. В 2-х томах. Т.1. --- М.: Мир, 1984.
+\end{thebibliography}
+\end{document}
